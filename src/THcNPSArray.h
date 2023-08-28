@@ -259,6 +259,10 @@ protected:
   TClonesArray* frAdcSampPulseTimeRaw;
   TClonesArray* frAdcSampPed;
   TClonesArray* frAdcSampPulseInt;
+  TClonesArray* frAdcSampPulseNSBInt;
+  TClonesArray* frAdcSampPulseNSAInt;
+  TClonesArray* frAdcSampPulseNumBeforePeak;
+  TClonesArray* frAdcSampPulseNumAfterPeak;
   TClonesArray* frAdcSampPulseAmp;
   TClonesArray* frAdcSampPulseTime;
   TClonesArray* frAdcSampWaveform;

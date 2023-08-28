@@ -64,6 +64,10 @@ THcNPSArray::THcNPSArray( const char* name,
   frAdcSampPulseTimeRaw = new TClonesArray("THcSignalHit", 16);
   frAdcSampPed          = new TClonesArray("THcSignalHit", 16);
   frAdcSampPulseInt     = new TClonesArray("THcSignalHit", 16);
+  frAdcSampPulseNSAInt     = new TClonesArray("THcSignalHit", 16);
+  frAdcSampPulseNSBInt     = new TClonesArray("THcSignalHit", 16);
+  frAdcSampPulseNumBeforePeak     = new TClonesArray("THcSignalHit", 16);
+  frAdcSampPulseNumAfterPeak     = new TClonesArray("THcSignalHit", 16);
   frAdcSampPulseAmp     = new TClonesArray("THcSignalHit", 16);
   frAdcSampPulseTime    = new TClonesArray("THcSignalHit", 16);
 
@@ -116,6 +120,10 @@ THcNPSArray::~THcNPSArray()
   delete frAdcSampPulseTimeRaw; frAdcSampPulseTimeRaw = NULL;
   delete frAdcSampPed;          frAdcSampPed          = NULL;
   delete frAdcSampPulseInt;     frAdcSampPulseInt     = NULL;
+  delete frAdcSampPulseNumBeforePeak;     frAdcSampPulseNumBeforePeak     = NULL;
+  delete frAdcSampPulseNumAfterPeak;     frAdcSampPulseNumAfterPeak     = NULL;
+  delete frAdcSampPulseNSBInt;     frAdcSampPulseNSBInt     = NULL;
+  delete frAdcSampPulseNSAInt;     frAdcSampPulseNSAInt     = NULL;
   delete frAdcSampPulseAmp;     frAdcSampPulseAmp     = NULL;
   delete frAdcSampPulseTime;    frAdcSampPulseTime    = NULL;
 
@@ -238,7 +246,6 @@ Int_t THcNPSArray::ReadDatabase( const TDatime& date )
   // Debug output.
 
   fParent = GetParent();
-
   if (static_cast<THcNPSCalorimeter*>(fParent)->fdbg_init_cal) {
     cout << "---------------------------------------------------------------\n";
     cout << "Debug output from THcNPSArray::ReadDatabase for "
@@ -532,6 +539,10 @@ Int_t THcNPSArray::DefineVariables( EMode mode )
       {"adcSampPulseTimeRaw", "Raw ADCSAMP pulse times",       "frAdcSampPulseTimeRaw.THcSignalHit.GetData()"},
       {"adcSampPed",          "ADCSAMP pedestals",             "frAdcSampPed.THcSignalHit.GetData()"},
       {"adcSampPulseInt",     "ADCSAMP pulse integrals",       "frAdcSampPulseInt.THcSignalHit.GetData()"},
+      {"adcSampPulseNSBInt",     "ADCSAMP NSB pulse integrals",       "frAdcSampPulseNSBInt.THcSignalHit.GetData()"},
+      {"adcSampPulseNumBeforePeak",     "ADCSAMP Num Samples before peak",       "frAdcSampPulseNumBeforePeak.THcSignalHit.GetData()"},
+      {"adcSampPulseNumAfterPeak",     "ADCSAMP Num Samples after 10% of peak",       "frAdcSampPulseNumAfterPeak.THcSignalHit.GetData()"},
+      {"adcSampPulseNSAInt",     "ADCSAMP NSA pulse integrals",       "frAdcSampPulseNSAInt.THcSignalHit.GetData()"},
       {"adcSampPulseAmp",     "ADCSAMP pulse amplitudes",      "frAdcSampPulseAmp.THcSignalHit.GetData()"},
       {"adcSampPulseTime",    "ADCSAMP pulse times",           "frAdcSampPulseTime.THcSignalHit.GetData()"},
 
@@ -625,6 +636,10 @@ void THcNPSArray::Clear( Option_t* )
   frAdcSampPulseTimeRaw->Clear();
   frAdcSampPed->Clear();
   frAdcSampPulseInt->Clear();
+  frAdcSampPulseNSAInt->Clear();
+  frAdcSampPulseNSBInt->Clear();
+  frAdcSampPulseNumBeforePeak->Clear();
+  frAdcSampPulseNumAfterPeak->Clear();
   frAdcSampPulseAmp->Clear();
   frAdcSampPulseTime->Clear();
 
@@ -1130,11 +1145,19 @@ Int_t THcNPSArray::AccumulateHits(TClonesArray* rawhits, Int_t nexthit, Int_t tr
       
       ((THcSignalHit*) frAdcSampPulseIntRaw->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseIntRaw(thit));
       ((THcSignalHit*) frAdcSampPulseInt->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseInt(thit));
+      ((THcSignalHit*) frAdcSampPulseNSBInt->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseNSBInt(thit));
+      ((THcSignalHit*) frAdcSampPulseNumBeforePeak->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseNumBeforePeak(thit));
+      ((THcSignalHit*) frAdcSampPulseNumAfterPeak->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseNumAfterPeak(thit));
+      ((THcSignalHit*) frAdcSampPulseNSAInt->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseNSAInt(thit));
       
       ((THcSignalHit*) frAdcSampPulseAmpRaw->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseAmpRaw(thit));
       ((THcSignalHit*) frAdcSampPulseAmp->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseAmp(thit));
       ((THcSignalHit*) frAdcSampPulseTimeRaw->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTimeRaw(thit));
-      if (padnum<fNelem) ((THcSignalHit*) frAdcSampPulseTime->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit)+fAdcTdcOffset[padnum]);
+      if (padnum<fNelem) {
+           ((THcSignalHit*) frAdcSampPulseTime->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit)+fAdcTdcOffset[padnum]);
+      } else {
+            ((THcSignalHit*) frAdcSampPulseTime->ConstructedAt(nrSampAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit));
+      }
       //
       if ( rawAdcHit.GetNPulses() == 0 || fUseSampWaveform ==1 ) {
 	((THcSignalHit*) frAdcPedRaw->ConstructedAt(nrAdcHits))->Set(padnum, rawAdcHit.GetSampPedRaw());
@@ -1147,7 +1170,11 @@ Int_t THcNPSArray::AccumulateHits(TClonesArray* rawhits, Int_t nexthit, Int_t tr
 	((THcSignalHit*) frAdcPulseAmp->ConstructedAt(nrAdcHits))->Set(padnum,rawAdcHit.GetSampPulseAmp(thit) );
 	
 	((THcSignalHit*) frAdcPulseTimeRaw->ConstructedAt(nrAdcHits))->Set(padnum,rawAdcHit.GetSampPulseTimeRaw(thit) );
-	if (padnum<fNelem) ((THcSignalHit*) frAdcPulseTime->ConstructedAt(nrAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit)+fAdcTdcOffset[padnum]);
+	if (padnum<fNelem) { 
+             ((THcSignalHit*) frAdcPulseTime->ConstructedAt(nrAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit)+fAdcTdcOffset[padnum]);
+	} else {
+	  ((THcSignalHit*) frAdcPulseTime->ConstructedAt(nrAdcHits))->Set(padnum, rawAdcHit.GetSampPulseTime(thit));
+	}
 
 	((THcSignalHit*) frAdcErrorFlag->ConstructedAt(nrAdcHits))->Set(padnum, 3);  
 	if (fUseSampWaveform ==1) ((THcSignalHit*) frAdcErrorFlag->ConstructedAt(nrAdcHits))->Set(padnum, 0);  
